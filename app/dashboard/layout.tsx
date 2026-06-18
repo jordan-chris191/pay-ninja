@@ -26,6 +26,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showNew, setShowNew] = useState(false);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const isDark = resolvedTheme === "dark";
 
@@ -68,8 +69,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         console.error(profileRes.error);
       }
 
-      // Fall back to sensible defaults if the row doesn't exist yet —
-      // it'll be created on first save via upsert.
       setProfile(
         profileRes.data
           ? mapProfile(profileRes.data)
@@ -102,7 +101,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const handleSaveInvoice = async (inv: Invoice) => {
     if (!user) return;
 
-    // Generate next invoice number
     const { data: lastInv } = await supabase
       .from("invoices")
       .select("invoice_number")
@@ -211,8 +209,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // profile is always set by the time loading flips false (see effect above);
-  // this guard just satisfies the type checker.
   if (!profile) return null;
 
   return (
@@ -235,6 +231,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           userEmail={userEmail}
           avatarUrl={avatarUrl}
           onSignOut={handleSignOut}
+          mobileOpen={mobileSidebarOpen}
+          onMobileOpenChange={setMobileSidebarOpen}
         />
 
         <main className="flex flex-1 flex-col overflow-hidden">
@@ -244,9 +242,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             mounted={mounted}
             onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
             onNewInvoice={() => setShowNew(true)}
+            onToggleSidebar={() => setMobileSidebarOpen(true)}
           />
 
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-4 sm:p-6">
             {children}
           </div>
         </main>
