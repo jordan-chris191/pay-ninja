@@ -11,9 +11,12 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+
+
 export const metadata: Metadata = {
   title: "PayNinja — Invoicing for Freelancers",
   description: "Create professional invoices with built-in payment links",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
