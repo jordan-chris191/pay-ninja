@@ -278,13 +278,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       }}
     >
       <div className="flex h-screen bg-muted/40">
-        <Sidebar
+       <Sidebar
           invoiceCount={invoices.length}
-          userInitials={userInitials}
-          userName={userName}
-          userEmail={userEmail}
-          avatarUrl={avatarUrl}
-          onSignOut={handleSignOut}
           mobileOpen={mobileSidebarOpen}
           onMobileOpenChange={setMobileSidebarOpen}
         />
@@ -292,11 +287,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <main className="flex flex-1 flex-col overflow-hidden">
           <DashboardHeader
             dateLabel="June 2026"
-            isDark={isDark}
+            isDark={resolvedTheme === "dark"}
             mounted={mounted}
-            onToggleTheme={() => setTheme(isDark ? "light" : "dark")}
+            userInitials={userInitials}
+            userName={userName}
+            userEmail={userEmail}
+            avatarUrl={avatarUrl}
+            onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             onNewInvoice={() => setShowNew(true)}
             onToggleSidebar={() => setMobileSidebarOpen(true)}
+            onSignOut={handleSignOut}
           />
 
           <div className="flex-1 overflow-auto p-4 sm:p-6">{children}</div>

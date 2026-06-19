@@ -5,10 +5,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, FileText, Users, Settings, LogOut, TrendingUp, Bell,
+  LayoutDashboard, FileText, Users, TrendingUp,
   PanelLeftClose, PanelLeftOpen, X,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -20,11 +19,6 @@ interface NavItem {
 
 interface SidebarProps {
   invoiceCount: number;
-  userInitials: string;
-  userName: string;
-  userEmail: string;
-  avatarUrl?: string;
-  onSignOut: () => void;
   /** Controls mobile sheet visibility from parent (e.g. DashboardHeader hamburger) */
   mobileOpen?: boolean;
   onMobileOpenChange?: (open: boolean) => void;
@@ -40,11 +34,6 @@ const STORAGE_KEY_WIDTH = "sidebar:width";
 
 export function Sidebar({
   invoiceCount,
-  userInitials,
-  userName,
-  userEmail,
-  avatarUrl,
-  onSignOut,
   mobileOpen = false,
   onMobileOpenChange,
 }: SidebarProps) {
@@ -104,7 +93,6 @@ export function Sidebar({
     { icon: FileText, label: "Invoices", href: "/dashboard/invoices", badge: String(invoiceCount) },
     { icon: Users, label: "Clients", href: "/dashboard/clients" },
     { icon: TrendingUp, label: "Analytics", href: "/dashboard/analytics" },
-    { icon: Settings, label: "Settings", href: "/dashboard/settings" },
   ];
 
   const isActive = (href: string) =>
@@ -189,45 +177,6 @@ export function Sidebar({
           </Link>
         ))}
       </nav>
-
-      {/* Bottom actions */}
-      <div className="border-t p-3 space-y-0.5">
-        <button
-          title={collapsed && !isMobile ? "Notifications" : undefined}
-          className={`flex w-full items-center gap-2.5 rounded-lg py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors ${collapsed && !isMobile ? "justify-center px-2" : "px-2.5"}`}
-          onClick={() => { toast.info("No new notifications"); isMobile && onMobileOpenChange?.(false); }}
-        >
-          <Bell className="h-4 w-4 shrink-0" />
-          {(!collapsed || isMobile) && <span className="flex-1 text-left">Notifications</span>}
-        </button>
-        <Button
-          variant="ghost"
-          size="sm"
-          title={collapsed && !isMobile ? "Sign out" : undefined}
-          className={`w-full text-sidebar-foreground/70 hover:text-sidebar-foreground text-sm ${collapsed && !isMobile ? "justify-center px-2" : "justify-start px-2.5"}`}
-          onClick={() => { onSignOut(); isMobile && onMobileOpenChange?.(false); }}
-        >
-          <LogOut className={collapsed && !isMobile ? "h-4 w-4" : "mr-2.5 h-4 w-4"} />
-          {(!collapsed || isMobile) && "Sign out"}
-        </Button>
-      </div>
-
-      {/* User profile */}
-      <div className="border-t px-3 py-3">
-        <div className={`flex items-center gap-2.5 ${collapsed && !isMobile ? "justify-center" : ""}`}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={userName} className="h-8 w-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary text-xs font-bold">{userInitials}</div>
-          )}
-          {(!collapsed || isMobile) && (
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-xs font-medium">{userName}</div>
-              <div className="truncate text-[10px] text-muted-foreground">{userEmail}</div>
-            </div>
-          )}
-        </div>
-      </div>
     </>
   );
 

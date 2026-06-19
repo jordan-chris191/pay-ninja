@@ -99,7 +99,7 @@ export function HeaderSearch() {
         className="h-8 w-full rounded-md border bg-muted/40 pl-8 pr-12 text-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring"
       />
       {mounted && !query && (
-        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground hidden sm:inline-flex">
           {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       )}
