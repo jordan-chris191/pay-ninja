@@ -1,9 +1,9 @@
-// middleware.ts
+// lib/supabase/middleware.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
     request,
   })
 
@@ -19,25 +19,19 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          response = NextResponse.next({
+          supabaseResponse = NextResponse.next({
             request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  // ✅ Refresh session if expired — this keeps users logged in
+  // ✅ Use getSession() to refresh expired tokens
   await supabase.auth.getSession()
 
-  return response
-}
-
-export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  return supabaseResponse
 }
