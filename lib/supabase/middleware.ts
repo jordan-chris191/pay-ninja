@@ -1,4 +1,3 @@
-// lib/supabase/middleware.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -30,8 +29,18 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // ✅ Use getSession() to refresh expired tokens
-  await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { pathname } = request.nextUrl
+
+  // If logged in and on the landing page → redirect to dashboard
+  if (user && pathname === '/') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // If NOT logged in and trying to access a protected route → redirect to /
+  if (!user && pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
 
   return supabaseResponse
 }
