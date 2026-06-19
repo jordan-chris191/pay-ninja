@@ -88,6 +88,55 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     loadData();
   }, [router, supabase]);
 
+  // ─── Realtime subscription ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`invoices:user-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "invoices",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+
+          if (eventType === "INSERT") {
+            setInvoices((prev) => {
+              const mapped = mapInvoice(newRecord);
+              if (prev.some((i) => i.id === mapped.id)) return prev;
+              return [mapped, ...prev];
+            });
+          } else if (eventType === "UPDATE") {
+            setInvoices((prev) =>
+              prev.map((i) =>
+                i.id === newRecord.invoice_number
+                  ? mapInvoice(newRecord)
+                  : i
+              )
+            );
+          } else if (eventType === "DELETE") {
+            setInvoices((prev) =>
+              prev.filter((i) => i.id !== oldRecord.invoice_number)
+            );
+          }
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === "CHANNEL_ERROR") {
+          console.error("Realtime channel error:", err);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, supabase]);
+
   const refreshInvoices = async () => {
     if (!user) return;
     const { data } = await supabase
@@ -148,7 +197,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       return;
     }
 
-    setInvoices(prev => prev.filter(i => i.id !== id));
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
     toast.success("Invoice deleted");
   };
 
@@ -163,7 +212,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       return;
     }
 
-    setInvoices(prev => prev.map(i => i.id === id ? { ...i, status: "paid" } : i));
+    setInvoices((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, status: "paid" } : i))
+    );
     toast.success("Marked as paid");
   };
 
@@ -196,10 +247,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     router.push("/");
   };
 
-  const userInitials = user?.email?.split("@")[0]?.slice(0, 2).toUpperCase() || "U";
-  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const userInitials =
+    user?.email?.split("@")[0]?.slice(0, 2).toUpperCase() || "U";
+  const userName =
+    user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const userEmail = user?.email || "";
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
+  const avatarUrl =
+    user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
 
   if (loading) {
     return (
@@ -245,13 +299,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             onToggleSidebar={() => setMobileSidebarOpen(true)}
           />
 
-          <div className="flex-1 overflow-auto p-4 sm:p-6">
-            {children}
-          </div>
+          <div className="flex-1 overflow-auto p-4 sm:p-6">{children}</div>
         </main>
 
-        <NewInvoiceDialog open={showNew} onClose={() => setShowNew(false)} onSave={handleSaveInvoice} />
-        <ViewInvoiceDialog invoice={viewInvoice} onClose={() => setViewInvoice(null)} />
+        <NewInvoiceDialog
+          open={showNew}
+          onClose={() => setShowNew(false)}
+          onSave={handleSaveInvoice}
+        />
+        <ViewInvoiceDialog
+          invoice={viewInvoice}
+          onClose={() => setViewInvoice(null)}
+        />
       </div>
     </DashboardProvider>
   );
