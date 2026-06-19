@@ -53,44 +53,58 @@ export function AuthDialog({ mode, onClose, onSwitchMode }: AuthDialogProps) {
   const strengthColor = password.length === 0 ? "bg-muted" : allRulesMet ? "bg-emerald-500" : passwordStrength >= 3 ? "bg-amber-500" : "bg-red-500";
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
 
-    // Strict validation on register
-    if (!isLogin && !allRulesMet) {
-      setError("Please meet all password requirements");
-      setLoading(false);
-      return;
-    }
+  if (!isLogin && !allRulesMet) {
+    setError("Please meet all password requirements");
+    setLoading(false);
+    return;
+  }
 
-    try {
-      if (isLogin) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-      } else {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name },
-          },
-        });
-        if (signUpError) throw signUpError;
-      }
+  try {
+    if (isLogin) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw signInError;
 
       router.push("/dashboard");
       router.refresh();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    } else {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      // Supabase returns identities: [] when email is already registered
+      // instead of throwing an error (to prevent email enumeration)
+      if (data.user && data.user.identities?.length === 0) {
+        setError("An account with this email already exists. Please sign in instead.");
+        return;
+      }
+
+      // Email confirmation is pending — don't redirect to dashboard yet
+      setError(null);
+      // Show a success message instead of redirecting
+      // (user needs to confirm email first)
+      alert("Check your email to confirm your account before signing in.");
+      onClose();
     }
-  };
+  } catch (err: any) {
+    setError(err.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
