@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import { AuthDialogProvider } from "@/context/auth-dialog-context";
 import { Providers } from "./providers";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 // Proper next/font setup
@@ -25,10 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body className={`${dmSans.className} min-h-full flex flex-col`}>
         <Providers>
           <AuthDialogProvider>{children}</AuthDialogProvider>
+          <SpeedInsights />
+          <Analytics />
         </Providers>
       </body>
     </html>
