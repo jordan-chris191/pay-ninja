@@ -4,6 +4,7 @@ import { AuthDialogProvider } from "@/context/auth-dialog-context";
 import { Providers } from "./providers";
 import "./globals.css";
 
+// Proper next/font setup
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
