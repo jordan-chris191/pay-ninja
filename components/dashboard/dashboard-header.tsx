@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Sun, Moon, Plus, Menu, Bell, Settings, LogOut } from "lucide-react";
+import { Sun, Moon, Plus, Bell, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,7 +32,6 @@ interface DashboardHeaderProps {
   avatarUrl?: string;
   onToggleTheme: () => void;
   onNewInvoice: () => void;
-  onToggleSidebar: () => void;
   onSignOut: () => void;
 }
 
@@ -46,7 +45,6 @@ export function DashboardHeader({
   avatarUrl,
   onToggleTheme,
   onNewInvoice,
-  onToggleSidebar,
   onSignOut,
 }: DashboardHeaderProps) {
   const pathname = usePathname();
@@ -54,27 +52,17 @@ export function DashboardHeader({
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-3 sm:px-6">
-      {/* Mobile: Hamburger + compact title */}
-      <div className="flex items-center gap-2 shrink-0 sm:gap-0">
-        <button
-          onClick={onToggleSidebar}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
-          aria-label="Open menu"
-        >
-          <Menu className="h-4 w-4" />
-        </button>
-
-        <div className="shrink-0">
-          <h1 className="text-[15px] font-semibold tracking-tight leading-tight">
-            {title}
-          </h1>
-          <p className="text-[11px] text-muted-foreground leading-tight hidden sm:block">
-            {dateLabel}
-          </p>
-        </div>
+      {/* Title + date */}
+      <div className="shrink-0">
+        <h1 className="text-[15px] font-semibold tracking-tight leading-tight">
+          {title}
+        </h1>
+        <p className="text-[11px] text-muted-foreground leading-tight hidden sm:block">
+          {dateLabel}
+        </p>
       </div>
 
-      {/* Search: full width on mobile, centered on desktop */}
+      {/* Search */}
       <div className="flex flex-1 justify-center min-w-0">
         <HeaderSearch />
       </div>
@@ -88,30 +76,30 @@ export function DashboardHeader({
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
-          {/* Optional badge — uncomment if you have real count */}
-          {/* <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" /> */}
         </button>
 
-        {/* Theme toggle */}
+        {/* Theme toggle — same DOM structure on server & client */}
         <button
           onClick={onToggleTheme}
-          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           aria-label="Toggle theme"
         >
-          {mounted ? (
-            isDark ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )
-          ) : (
-            <div className="h-4 w-4" />
-          )}
+          <Sun
+            className={`h-4 w-4 absolute transition-opacity duration-200 ${
+              mounted && isDark ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          <Moon
+            className={`h-4 w-4 absolute transition-opacity duration-200 ${
+              mounted && !isDark ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          <div className="h-4 w-4" />
         </button>
 
         <div className="h-6 w-px bg-border hidden sm:block" />
 
-        {/* New invoice: icon-only on mobile, text on desktop */}
+        {/* New invoice */}
         <Button
           size="sm"
           className="gap-1.5 text-xs h-8 px-2 sm:px-3"

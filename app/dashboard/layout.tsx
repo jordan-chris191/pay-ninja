@@ -26,9 +26,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showNew, setShowNew] = useState(false);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
-  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     setMounted(true);
@@ -278,11 +275,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       }}
     >
       <div className="flex h-screen bg-muted/40">
-       <Sidebar
-          invoiceCount={invoices.length}
-          mobileOpen={mobileSidebarOpen}
-          onMobileOpenChange={setMobileSidebarOpen}
-        />
+        <Sidebar invoiceCount={invoices.length} />
 
         <main className="flex flex-1 flex-col overflow-hidden">
           <DashboardHeader
@@ -295,11 +288,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             avatarUrl={avatarUrl}
             onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             onNewInvoice={() => setShowNew(true)}
-            onToggleSidebar={() => setMobileSidebarOpen(true)}
             onSignOut={handleSignOut}
           />
 
-          <div className="flex-1 overflow-auto p-4 sm:p-6">{children}</div>
+          {/* pb-20 on mobile for bottom nav, normal on desktop */}
+          <div className="flex-1 overflow-auto p-4 sm:p-6 pb-20 lg:pb-6">
+            {children}
+          </div>
         </main>
 
         <NewInvoiceDialog
